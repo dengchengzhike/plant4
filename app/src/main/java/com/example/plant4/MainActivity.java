@@ -1,9 +1,11 @@
 package com.example.plant4;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Message;
 import android.util.Log;
@@ -11,10 +13,16 @@ import android.view.View;
 import android.widget.Button;
 import android.os.Handler;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
+import com.skydoves.progressview.OnProgressChangeListener;
+import com.skydoves.progressview.OnProgressClickListener;
+import com.skydoves.progressview.ProgressView;
+import com.skydoves.progressview.TextForm;
 
+import org.w3c.dom.Text;
+import android.content.Context;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -43,8 +51,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView tempdata;
     private TextView weightdata;
     private TextView phdata;
-
-
+    private Handler hdlr = new Handler();
+    private int i = 0;
 
 
     @Override
@@ -56,25 +64,56 @@ public class MainActivity extends AppCompatActivity {
         tree = (ImageButton) findViewById(R.id.tree);
         sunbtn = (ImageButton) findViewById(R.id.sunbtn);
         humbtn = (ImageButton) findViewById(R.id.humbtn);
-        phbtn = (ImageButton) findViewById(R.id.phbtn);
+
         tempbtn = (ImageButton) findViewById(R.id.tempbtn);
         humlevel =(TextView)findViewById(R.id.humlevel);
         templevel =(TextView)findViewById(R.id.templevel);
-        phlevel =(TextView)findViewById(R.id.phlevel);
+
         sunlevel =(TextView)findViewById(R.id.sunlevel);//id后面为上方button的id
         sundata =(TextView)findViewById(R.id.sundata);
         phdata =(TextView)findViewById(R.id.phdata);
         tempdata =(TextView)findViewById(R.id.tempdata);
         humdata =(TextView)findViewById(R.id.humdata);
         weightdata =(TextView)findViewById(R.id.weightdata);
+        ProgressBar pgsBar = (ProgressBar) findViewById(R.id.progressbar1);
 
         setListener();
-       waterbtn.setOnClickListener(new View.OnClickListener() {
+
+
+
+
+
+        waterbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent1 = new Intent();
                 intent1.setClass(com.example.plant4.MainActivity.this, chartActivity.class);//this前面为当前activty名称，class前面为要跳转到得activity名称
                 startActivity(intent1);
+
+
+                i = pgsBar.getProgress();
+                new Thread(new Runnable() {
+                    public void run() {
+                        while (i < 100) {
+                            i += 1;
+                            // Update the progress bar and display the current value in text view
+                            hdlr.post(new Runnable() {
+                                public void run() {
+                                    pgsBar.setProgress(i);
+                                    tempdata.setText(i+"/"+pgsBar.getMax());
+                                }
+                            });
+                            try {
+                                // Sleep for 100 milliseconds to show the progress slowly.
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }).start();
+
+
             }
         });
     }
